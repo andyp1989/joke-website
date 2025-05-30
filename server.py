@@ -40,7 +40,7 @@ def create_joke():
 
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4.1"  # or "gpt-4.1-mini"
             messages=[
                 {"role": "system", "content": "You are a professional joke writer."},
                 {"role": "user", "content": prompt}
