@@ -29,11 +29,31 @@ def init_db():
 
 init_db()
 
-# Joke generation (simulated)
+import openai  # make sure this is at the top of your file
+
+# Your OpenAI API key
+openai.api_key = "YOUR_OPENAI_API_KEY"
+
 def create_joke():
     ratings = ['G', 'PG', 'PG-13', 'R']
     rating = random.choice(ratings)
-    joke = f"This is a fake {rating}-rated joke."
+
+    prompt = f"Tell me a {rating}-rated, short joke. Only respond with the joke."
+
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-3.5-turbo",
+            messages=[
+                {"role": "system", "content": "You are a professional joke writer."},
+                {"role": "user", "content": prompt}
+            ],
+            max_tokens=60,
+            temperature=0.9
+        )
+        joke = response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        joke = "Oops! Couldn't generate a joke right now."
+
     conn = get_db_connection()
     cur = conn.cursor()
     cur.execute("INSERT INTO jokes (joke, rating, upvotes, downvotes, created_at) VALUES (?, ?, 0, 0, ?)",
@@ -42,6 +62,7 @@ def create_joke():
     joke_id = cur.lastrowid
     conn.close()
     return {'id': joke_id, 'joke': joke, 'rating': rating, 'upvotes': 0, 'downvotes': 0}
+
 
 @app.route('/')
 def index():
