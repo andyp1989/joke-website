@@ -63,6 +63,7 @@ def create_joke():
     conn.close()
     return {'id': joke_id, 'joke': joke, 'rating': rating, 'upvotes': 0, 'downvotes': 0}
 
+
 @app.route('/')
 def index():
     return send_from_directory('.', 'index.html')
