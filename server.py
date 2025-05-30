@@ -32,6 +32,8 @@ def init_db():
 
 init_db()
 
+openai.api_key = "sk-..."  # your actual key here
+
 def create_joke():
     ratings = ['G', 'PG', 'PG-13', 'R']
     rating = random.choice(ratings)
@@ -49,17 +51,7 @@ def create_joke():
             temperature=0.9
         )
         joke = response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        joke = "Oops! Couldn't generate a joke right now."
 
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("INSERT INTO jokes (joke, rating, upvotes, downvotes, created_at) VALUES (?, ?, 0, 0, ?)",
-                (joke, rating, datetime.now()))
-    conn.commit()
-    joke_id = cur.lastrowid
-    conn.close()
-    return {'id': joke_id, 'joke': joke, 'rating': rating, 'upvotes': 0, 'downvotes': 0}
 
 @app.route('/')
 def index():
