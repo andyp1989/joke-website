@@ -2,16 +2,20 @@ from flask import Flask, jsonify, request, send_from_directory
 import random
 import sqlite3
 from datetime import datetime
+import openai
 import os
 
 app = Flask(__name__, static_folder='static')
+
+# 🔑 Your OpenAI API key here
+openai.api_key = "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"
 
 def get_db_connection():
     conn = sqlite3.connect('jokes.db')
     conn.row_factory = sqlite3.Row
     return conn
 
-# Ensure database and table exist
+# Initialize database if not already created
 def init_db():
     conn = get_db_connection()
     conn.execute("""
@@ -29,11 +33,7 @@ def init_db():
 
 init_db()
 
-import openai  # make sure this is at the top of your file
-
-# Your OpenAI API key
-openai.api_key = "YOUR_OPENAI_API_KEY"
-
+# 🎭 Joke generation using OpenAI
 def create_joke():
     ratings = ['G', 'PG', 'PG-13', 'R']
     rating = random.choice(ratings)
@@ -62,7 +62,6 @@ def create_joke():
     joke_id = cur.lastrowid
     conn.close()
     return {'id': joke_id, 'joke': joke, 'rating': rating, 'upvotes': 0, 'downvotes': 0}
-
 
 @app.route('/')
 def index():
@@ -107,6 +106,6 @@ def vote():
 def send_static(path):
     return send_from_directory('static', path)
 
-# Use dynamic port for Render.com
+# 🌐 Run on Render's dynamic port
 port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
