@@ -8,7 +8,7 @@ import os
 app = Flask(__name__, static_folder='static')
 
 # 🔑 Replace with your real OpenAI API key
-openai.api_key = "sk-REPLACE_WITH_YOUR_KEY"
+openai.api_key = "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"
 
 def get_db_connection():
     conn = sqlite3.connect('jokes.db')
