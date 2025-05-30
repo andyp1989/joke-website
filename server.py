@@ -2,13 +2,14 @@ from flask import Flask, jsonify, request, send_from_directory
 import random
 import sqlite3
 from datetime import datetime
-import openai
+import json
 import os
 
 app = Flask(__name__, static_folder='static')
 
-# 🔑 Replace with your actual OpenAI key
-openai.api_key = "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"
+# Load jokes from jokes.json once at startup
+with open('jokes.json', 'r') as f:
+    JOKES = json.load(f)
 
 def get_db_connection():
     conn = sqlite3.connect('jokes.db')
@@ -33,24 +34,9 @@ def init_db():
 init_db()
 
 def create_joke():
-    ratings = ['G', 'PG', 'PG-13', 'R']
-    rating = random.choice(ratings)
-
-    prompt = f"Tell me a {rating}-rated, short joke. Only respond with the joke."
-
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4.1"  # or "gpt-4.1-mini"
-            messages=[
-                {"role": "system", "content": "You are a professional joke writer."},
-                {"role": "user", "content": prompt}
-            ],
-            max_tokens=60,
-            temperature=0.9
-        )
-        joke = response['choices'][0]['message']['content'].strip()
-    except Exception as e:
-        joke = "Oops! Couldn't generate a joke right now."
+    joke_obj = random.choice(JOKES)
+    joke = joke_obj["joke"]
+    rating = joke_obj["rating"]
 
     conn = get_db_connection()
     cur = conn.cursor()
@@ -104,6 +90,5 @@ def vote():
 def send_static(path):
     return send_from_directory('static', path)
 
-# Run the app (Render uses PORT env var)
 port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
