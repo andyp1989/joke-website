@@ -7,7 +7,7 @@ import os
 
 app = Flask(__name__, static_folder='static')
 
-# 🔑 Replace with your real OpenAI API key
+# 🔑 Replace with your actual OpenAI key
 openai.api_key = "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"
 
 def get_db_connection():
@@ -32,8 +32,6 @@ def init_db():
 
 init_db()
 
-openai.api_key = "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"  # your actual key here
-
 def create_joke():
     ratings = ['G', 'PG', 'PG-13', 'R']
     rating = random.choice(ratings)
@@ -51,7 +49,17 @@ def create_joke():
             temperature=0.9
         )
         joke = response['choices'][0]['message']['content'].strip()
+    except Exception as e:
+        joke = "Oops! Couldn't generate a joke right now."
 
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("INSERT INTO jokes (joke, rating, upvotes, downvotes, created_at) VALUES (?, ?, 0, 0, ?)",
+                (joke, rating, datetime.now()))
+    conn.commit()
+    joke_id = cur.lastrowid
+    conn.close()
+    return {'id': joke_id, 'joke': joke, 'rating': rating, 'upvotes': 0, 'downvotes': 0}
 
 @app.route('/')
 def index():
@@ -96,5 +104,6 @@ def vote():
 def send_static(path):
     return send_from_directory('static', path)
 
+# Run the app (Render uses PORT env var)
 port = int(os.environ.get("PORT", 5000))
 app.run(host="0.0.0.0", port=port)
