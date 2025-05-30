@@ -32,7 +32,7 @@ def init_db():
 
 init_db()
 
-openai.api_key = "sk-..."  # your actual key here
+openai.api_key = "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"  # your actual key here
 
 def create_joke():
     ratings = ['G', 'PG', 'PG-13', 'R']
